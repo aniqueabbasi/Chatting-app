@@ -1,4 +1,5 @@
 import 'package:chatting_app/screens/ChatScreen.dart';
+import 'package:chatting_app/screens/NotificationScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,12 +20,11 @@ class HomeScreen extends StatelessWidget {
            IconButton(
       icon: const Icon(Icons.notifications),
       onPressed: () {
-        // Navigate to notification screen (we will create it next)
-        Navigator.push(
+         Navigator.push(
           context,
-          // MaterialPageRoute(
-          //   // builder: (_) => const NotificationScreen(),
-          // ),
+          MaterialPageRoute(
+            builder: (_) => const NotificationScreen(),
+          ),
         );
       },
     ),
