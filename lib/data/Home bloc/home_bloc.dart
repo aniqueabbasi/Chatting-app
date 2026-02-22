@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:chatting_app/data/bloc/home_event.dart';
-import 'package:chatting_app/data/bloc/home_state.dart';
+import 'package:chatting_app/data/Home%20bloc/home_event.dart';
+import 'package:chatting_app/data/Home%20bloc/home_state.dart';
 import 'package:chatting_app/repository/ChatRepository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show Bloc, Emitter;

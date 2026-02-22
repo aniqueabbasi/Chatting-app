@@ -1,6 +1,6 @@
-import 'package:chatting_app/data/bloc/home_bloc.dart';
-import 'package:chatting_app/data/bloc/home_event.dart';
-import 'package:chatting_app/data/bloc/home_state.dart';
+import 'package:chatting_app/data/Home%20bloc/home_bloc.dart';
+import 'package:chatting_app/data/Home%20bloc/home_event.dart';
+import 'package:chatting_app/data/Home%20bloc/home_state.dart';
 import 'package:chatting_app/screens/ChatScreen.dart';
 import 'package:chatting_app/screens/Login.dart';
 import 'package:chatting_app/screens/NotificationScreen.dart';

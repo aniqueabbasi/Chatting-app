@@ -1,7 +1,9 @@
 import 'package:chatting_app/Services/auth_service.dart';
+import 'package:chatting_app/data/Login bloc/login_bloc_bloc.dart';
+import 'package:chatting_app/data/Login bloc/login_bloc_state.dart';
 import 'package:chatting_app/screens/HomeScreen.dart';
-import 'package:chatting_app/screens/SignUpScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,8 +13,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController =
+      TextEditingController();
+  final TextEditingController passwordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -21,186 +25,130 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Widget buildTextField({
-    required String title,
-    required String hint,
-    required TextEditingController controller,
-    bool obscure = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 45,
-          child: TextField(
-            controller: controller,
-            obscureText: obscure,
-            decoration: InputDecoration(
-              hintText: hint,
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 15,
-              ),
-              filled: true,
-              fillColor: Colors.grey.shade200,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          /// Background Image
-          Positioned.fill(
-            child: Image.asset(
-              "assets/images/background.jpg",
-              fit: BoxFit.cover,
-            ),
-          ),
+    return BlocProvider(
+      create: (_) => LoginBlocBloc(AuthService()),
+      child: Scaffold(
+        body: BlocListener<LoginBlocBloc, LoginBlocState>(
+          listener: (context, state) {
+            if (state is LoginBlocSuccess) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HomeScreen(),
+                ),
+              );
+            }
 
-          /// Dark Overlay
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.6),
-            ),
-          ),
-
-          Column(
-            children: [
-              const SizedBox(height: 150),
-
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40),
-                      topRight: Radius.circular(40),
+            if (state is LoginFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
+          child: BlocBuilder<LoginBlocBloc, LoginBlocState>(
+            builder: (context, state) {
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      "assets/images/background.jpg",
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  child: SingleChildScrollView(
-                    child: SingleChildScrollView(
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.circular(20),
+                      ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Center(
-                            child: Text(
-                              "Welcome Back!",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          const Text(
+                            "Welcome Back!",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
-                      
-                          const SizedBox(height: 40),
-                      
-                           buildTextField(
-                            title: "Email",
-                            hint: "Enter your email",
-                            controller: emailController,
-                          ),
-                      
                           const SizedBox(height: 20),
-                      
-                           buildTextField(
-                            title: "Password",
-                            hint: "Enter your password",
-                            controller: passwordController,
-                            obscure: true,
+
+                          TextField(
+                            controller: emailController,
+                            decoration:
+                                const InputDecoration(
+                              labelText: "Email",
+                            ),
                           ),
-                      
-                          const SizedBox(height: 40),
-                      
-                           SizedBox(
-                            height: 50,
+
+                          const SizedBox(height: 15),
+
+                          TextField(
+                            controller:
+                                passwordController,
+                            obscureText: true,
+                            decoration:
+                                const InputDecoration(
+                              labelText: "Password",
+                            ),
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          SizedBox(
+                            width: double.infinity,
                             child: ElevatedButton(
-                           onPressed: () async {
-                        AuthService authService = AuthService();
-                      
-                        String? result = await authService.login(
-                          email: emailController.text.trim(),
-                          password: passwordController.text.trim(),
-                        );
-                      
-                        if (result == null) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HomeScreen(),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(result)),
-                          );
-                        }
-                      },
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                "Log in",
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ),
-                          ),
-                      
-                          const SizedBox(height: 30),
-                      
-                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text("Don't have an account? "),
-                              GestureDetector(
-                                onTap: () {
-                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const SignUpScreen(),
+                              onPressed:
+                                  state is LoginBlocLoading
+                                      ? null
+                                      : () {
+                                          context
+                                              .read<
+                                                  LoginBlocBloc>()
+                                              .add(
+                                                LoginEvent(
+                                                  email:
+                                                      emailController
+                                                          .text
+                                                          .trim(),
+                                                  password:
+                                                      passwordController
+                                                          .text
+                                                          .trim(),
+                                                ),
+                                              );
+                                        },
+                              child: state
+                                      is LoginBlocLoading
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : const Text(
+                                      "Login",
                                     ),
-                                  );
-                                },
-                                child: const Text(
-                                  "Create one",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }
