@@ -1,3 +1,4 @@
+import 'package:chatting_app/data/ChatBloc/bloc/chat_bloc.dart';
 import 'package:chatting_app/data/Home%20bloc/home_bloc.dart';
 import 'package:chatting_app/data/Home%20bloc/home_event.dart';
 import 'package:chatting_app/data/Home%20bloc/home_state.dart';
@@ -149,20 +150,23 @@ class HomeScreen extends StatelessWidget {
                           ),
                           trailing:
                               const Icon(Icons.chat),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ChatScreen(
-                                  receiverId:
-                                      userData['uid'],
-                                  receiverName:
-                                      userData['name'],
-                                ),
-                              ),
-                            );
-                          },
+                      onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => BlocProvider(
+        create: (_) => ChatBloc(
+          chatRepository: ChatRepository(),
+        ),
+        child: ChatScreen(
+          receiverId: userData['uid'],
+          receiverName: userData['name'],
+        ),
+      ),
+    ),
+  );
+},
+
                         );
                       },
                     );
