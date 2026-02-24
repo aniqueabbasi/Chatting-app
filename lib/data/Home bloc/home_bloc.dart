@@ -13,7 +13,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   StreamSubscription? _userSub;
 
   List<QueryDocumentSnapshot> _users = [];
+
   Map<String, String> _lastMessageMap = {};
+  Map<String, String> _previousLastMessageMap = {};
 
   HomeBloc(this.repository) : super(HomeInitial()) {
     on<LoadHomeEvent>(_onLoadHome);
@@ -30,12 +32,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _userSub?.cancel();
     _chatSub?.cancel();
 
-    /// Listen Users
     _userSub = repository.getUsers().listen((users) {
       add(UsersUpdated(users));
     });
 
-    /// Listen Chats
     _chatSub =
         repository.getChats(event.currentUserId).listen((chats) {
       add(ChatsUpdated(
@@ -61,22 +61,66 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     ChatsUpdated event,
     Emitter<HomeState> emit,
   ) {
-    _lastMessageMap.clear();
+    String? newMessageSenderId;
+    String? newMessageText;
+    String? newMessageSenderName;
+
+    Map<String, String> updatedMap = {};
 
     for (var chatDoc in event.chats) {
-      List participants = chatDoc['participants'];
+      final data = chatDoc.data() as Map<String, dynamic>;
 
-      String otherUserId = participants.firstWhere(
-        (id) => id != event.currentUserId,
-      );
+      /// Safe participants read
+      List participants = data['participants'] ?? [];
 
-      _lastMessageMap[otherUserId] =
-          chatDoc['lastMessage'] ?? "";
+      if (!participants.contains(event.currentUserId)) continue;
+
+      String otherUserId =
+          participants.firstWhere((id) => id != event.currentUserId);
+
+       String newLastMessage = data['lastMessage'] ?? "";
+
+      updatedMap[otherUserId] = newLastMessage;
+
+       if (_previousLastMessageMap.containsKey(otherUserId) &&
+          _previousLastMessageMap[otherUserId] != newLastMessage) {
+
+         String senderId =
+            data.containsKey('lastMessageSenderId')
+                ? data['lastMessageSenderId']
+                : "";
+
+         if (senderId != event.currentUserId &&
+            senderId.isNotEmpty) {
+
+          newMessageSenderId = otherUserId;
+          newMessageText = newLastMessage;
+
+           final senderUser = _users.firstWhere(
+            (user) =>
+                (user.data() as Map<String, dynamic>)['uid'] ==
+                otherUserId,
+            orElse: () => _users.isNotEmpty ? _users.first : chatDoc,
+          );
+
+          if (_users.isNotEmpty) {
+            final senderData =
+                senderUser.data() as Map<String, dynamic>;
+            newMessageSenderName = senderData['name'] ?? "New Message";
+          }
+        }
+      }
     }
+
+    _lastMessageMap = updatedMap;
+    _previousLastMessageMap = Map.from(updatedMap);
 
     emit(HomeLoaded(
       users: _users,
       lastMessageMap: _lastMessageMap,
+      newMessageSenderId: newMessageSenderId,
+      newMessageText: newMessageText,
+      newMessageSenderName: newMessageSenderName,
     ));
   }
 

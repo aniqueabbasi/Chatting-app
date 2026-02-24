@@ -11,8 +11,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   StreamSubscription<List<MessageModel>>? _messageSubscription;
 
   ChatBloc({required this.chatRepository}) : super(ChatInitial()) {
-    /// Start listening to Firestore messages stream
-    on<LoadMessages>((event, emit) async {
+     on<LoadMessages>((event, emit) async {
       emit(ChatLoading());
 
       await _messageSubscription?.cancel();
@@ -24,8 +23,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       });
     });
 
-    /// When Firestore sends new messages
-    on<MessagesUpdated>((event, emit) {
+     on<MessagesUpdated>((event, emit) {
       emit(ChatLoaded(messages: event.messages));
     });
 
