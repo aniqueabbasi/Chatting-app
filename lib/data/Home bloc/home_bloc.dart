@@ -96,18 +96,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           newMessageSenderId = otherUserId;
           newMessageText = newLastMessage;
 
-           final senderUser = _users.firstWhere(
-            (user) =>
-                (user.data() as Map<String, dynamic>)['uid'] ==
-                otherUserId,
-            orElse: () => _users.isNotEmpty ? _users.first : chatDoc,
-          );
+           final matchingUsers = _users.where(
+  (user) =>
+      (user.data() as Map<String, dynamic>)['uid'] ==
+      otherUserId,
+);
 
-          if (_users.isNotEmpty) {
-            final senderData =
-                senderUser.data() as Map<String, dynamic>;
-            newMessageSenderName = senderData['name'] ?? "New Message";
-          }
+if (matchingUsers.isNotEmpty) {
+  final senderData =
+      matchingUsers.first.data() as Map<String, dynamic>;
+
+  newMessageSenderName =
+      senderData['name'] ?? "New Message";
+} else {
+  newMessageSenderName = "New Message";
+}
         }
       }
     }

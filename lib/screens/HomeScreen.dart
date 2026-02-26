@@ -7,9 +7,7 @@ import 'package:chatting_app/screens/ChatScreen.dart';
 import 'package:chatting_app/screens/Login.dart';
 import 'package:chatting_app/screens/NotificationScreen.dart';
 import 'package:chatting_app/repository/ChatRepository.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,8 +19,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final notificationServices = NotificationServices();
+
+  String? _lastNotifiedMessage; // prevents duplicate notifications
 
   @override
   void initState() {
@@ -35,24 +34,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return BlocProvider(
-      create: (context) => HomeBloc(
-        ChatRepository(),
-      )..add(
-          LoadHomeEvent(currentUser!.uid),
-        ),
+      create: (context) => HomeBloc(ChatRepository())
+        ..add(LoadHomeEvent(currentUser!.uid)),
       child: BlocListener<HomeBloc, HomeState>(
         listenWhen: (previous, current) => current is HomeLoaded,
         listener: (context, state) {
           if (state is HomeLoaded) {
-            if (state.newMessageSenderName != null) {
-              // NotificationService.showNotification(
-              //   "New Message",
-              //   "Message from ${state.newMessageSenderName}",
-              // );
+            if (state.newMessageSenderName != null &&
+                state.newMessageText != null) {
+
+              final messageKey =
+                  "${state.newMessageSenderName}-${state.newMessageText}";
+
+              if (_lastNotifiedMessage != messageKey) {
+                _lastNotifiedMessage = messageKey;
+
+                notificationServices.showSimpleNotification(
+                  title: "New Message",
+                  body:
+                      "${state.newMessageSenderName}: ${state.newMessageText}",
+                );
+              }
             }
           }
         },
@@ -141,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: BlocBuilder<HomeBloc, HomeState>(
                   builder: (context, state) {
-
                     if (state is HomeLoading) {
                       return const Center(
                         child: CircularProgressIndicator(),
@@ -149,13 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     if (state is HomeLoaded) {
-
                       final users = state.users;
 
                       return ListView.builder(
                         itemCount: users.length,
                         itemBuilder: (context, index) {
-
                           final userData =
                               users[index].data()
                                   as Map<String, dynamic>;
@@ -188,11 +190,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 MaterialPageRoute(
                                   builder: (_) => BlocProvider(
                                     create: (_) => ChatBloc(
-                                      chatRepository: ChatRepository(),
+                                      chatRepository:
+                                          ChatRepository(),
                                     ),
                                     child: ChatScreen(
-                                      receiverId: userData['uid'],
-                                      receiverName: userData['name'],
+                                      receiverId:
+                                          userData['uid'],
+                                      receiverName:
+                                          userData['name'],
                                     ),
                                   ),
                                 ),

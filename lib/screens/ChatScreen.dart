@@ -37,6 +37,17 @@ class _ChatScreenState extends State<ChatScreen> {
     context.read<ChatBloc>().add(LoadMessages(chatId));
   }
 
+  /// 🔥 Scroll Function
+  void _scrollToBottom() {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +78,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 if (state is ChatLoaded) {
                   final messages = state.messages;
+
+                  /// 🔥 Scroll after UI builds
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToBottom();
+                  });
 
                   return ListView.builder(
                     controller: scrollController,
@@ -135,8 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
           /// 🔹 Message Input
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 10, vertical: 8),
             color: Colors.white,
             child: Row(
               children: [

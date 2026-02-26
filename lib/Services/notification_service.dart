@@ -87,6 +87,28 @@ class NotificationServices {
       }
     }
   }
+  Future<void> showSimpleNotification({
+  required String title,
+  required String body,
+}) async {
+  const androidDetails = AndroidNotificationDetails(
+    'chat_channel',
+    'Chat Notifications',
+    importance: Importance.high,
+    priority: Priority.high,
+    icon: '@mipmap/ic_launcher',
+  );
+
+  const notificationDetails =
+      NotificationDetails(android: androidDetails);
+
+  await _flutterLocalNotificationsPlugin.show(
+    0,
+    title,
+    body,
+    notificationDetails,
+  );
+}
 
   // function to show visible notification when app is active
   Future<void> showNotification(RemoteMessage message) async {
