@@ -16,8 +16,8 @@ class ProfileLoaded extends ProfileState {
   final String email;
   final String uid;
   final bool isVerified;
-  final File? profileImage;
-  final File? coverImage;
+  final String? profileImageUrl;
+final String? coverImageUrl;
 
 
   const ProfileLoaded({
@@ -25,12 +25,12 @@ class ProfileLoaded extends ProfileState {
     required this.email,
     required this.uid,
     required this.isVerified,
-      this.coverImage,
-      this.profileImage,
+      this.coverImageUrl,
+      this.profileImageUrl,
    });
 
   @override
-  List<Object?> get props => [name, email, uid, isVerified,profileImage,coverImage];
+  List<Object?> get props => [name, email, uid, isVerified,profileImageUrl,coverImageUrl];
 }
 
 class ProfileError extends ProfileState {

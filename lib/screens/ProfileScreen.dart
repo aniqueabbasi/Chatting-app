@@ -34,28 +34,27 @@ class ProfileScreen extends StatelessWidget {
                         alignment: Alignment.topCenter,
                         children: [
 
-                          /// 🔥 COVER IMAGE
+                          /// 🔥 COVER IMAGE (FROM FIRESTORE URL)
                           GestureDetector(
                             onTap: () {
-                              context
-                                  .read<ProfileBloc>()
-                                  .add(PickCoverImage());
+                              context.read<ProfileBloc>().add(PickCoverImage());
                             },
                             child: Container(
                               height: 250,
                               width: double.infinity,
-                              decoration: state.coverImage != null
-                                  ? BoxDecoration(
-                                      image: DecorationImage(
-                                        image:
-                                            FileImage(state.coverImage!),
+                              decoration: BoxDecoration(
+                                image: state.coverImageUrl != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(
+                                            state.coverImageUrl!),
                                         fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : const BoxDecoration(
-                                      color: Colors.purple,
-                                    ),
-                              child: state.coverImage == null
+                                      )
+                                    : null,
+                                color: state.coverImageUrl == null
+                                    ? Colors.purple
+                                    : null,
+                              ),
+                              child: state.coverImageUrl == null
                                   ? const Center(
                                       child: Icon(
                                         Icons.camera_alt,
@@ -67,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
                             ),
                           ),
 
-                          /// 🔥 PROFILE IMAGE (OVERLAP)
+                          /// 🔥 PROFILE IMAGE
                           Positioned(
                             top: 200,
                             child: Stack(
@@ -85,9 +84,9 @@ class ProfileScreen extends StatelessWidget {
                                     child: CircleAvatar(
                                       radius: 50,
                                       backgroundImage:
-                                          state.profileImage != null
-                                              ? FileImage(
-                                                  state.profileImage!)
+                                          state.profileImageUrl != null
+                                              ? NetworkImage(
+                                                  state.profileImageUrl!)
                                               : const AssetImage(
                                                       "assets/profile.jpg")
                                                   as ImageProvider,
@@ -155,8 +154,7 @@ class ProfileScreen extends StatelessWidget {
 
                     /// ===== DETAILS =====
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
                           _buildField("Name", state.name),
